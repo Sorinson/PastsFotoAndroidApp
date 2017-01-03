@@ -6,8 +6,16 @@
         <item name="colorPrimary">@color/baltaKrasa</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
+        <item name="buttonStyle">@style/RobotoButtonStyle</item>
+    </style>
+    <style name="RobotoTextViewStyle" parent="android:Widget.TextView">
+        <item name="android:fontFamily">roboto</item>
     </style>
 
+    <style name="RobotoButtonStyle" parent="android:Widget.Holo.Button">
+        <item name="android:fontFamily">roboto</item>
+    </style>
     <style name="FullscreenTheme" parent="AppTheme">
         <item name="android:windowActionBarOverlay">true</item>
         <item name="android:windowBackground">@null</item>
