@@ -1,28 +1,20 @@
 package lv.iconcept.pastsfoto;
 
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.os.StrictMode;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v7.widget.Toolbar;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import static android.content.Intent.EXTRA_ALLOW_MULTIPLE;
 
-import static lv.iconcept.pastsfoto.R.mipmap.pf_logo;
 
 public class FullscreenActivity extends AppCompatActivity {
+    private static final int FILE_SELECT_CODE = 0;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
@@ -31,25 +23,40 @@ public class FullscreenActivity extends AppCompatActivity {
             public void onClick(View view) {
                 final LinearLayout ll = (LinearLayout) findViewById(R.id.pf_index_selectfilesButton);
                 ll.setBackgroundColor(Color.parseColor("#b58220"));
-                Timer t = new Timer();
-                t.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        final LinearLayout ll = (LinearLayout) findViewById(R.id.pf_index_selectfilesButton);
-                        ll.setBackgroundColor(Color.parseColor("#edaa28"));
-                    }
-                }, 2000);
-                AlertDialog alertDialog = new AlertDialog.Builder(FullscreenActivity.this).create();
-                alertDialog.setTitle("Alert");
-                alertDialog.setMessage("hue hue hue");
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-                alertDialog.show();
+                new android.os.Handler().postDelayed(
+                        new Runnable() {
+                            public void run() {
+                                final LinearLayout ll = (LinearLayout) findViewById(R.id.pf_index_selectfilesButton);
+                                ll.setBackgroundColor(Color.parseColor("#edaa28"));
+                            }
+                        },
+                        300);
+                showFileChooser();
+                /*
+                ImagePicker imagePickers = new ImagePicker();
+                try {
+                    imagePickers.execute((String) "getPictures", (JSONArray) new JSONArray(), new CallbackContext((String) "", (View) view));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                */
             }
+
+            private void showFileChooser() {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+
+                try {
+                    startActivityForResult(Intent.createChooser(intent, "SelectFiles"), FILE_SELECT_CODE);
+                } catch (android.content.ActivityNotFoundException ex) {
+                    // Potentially direct the user to the Market with a Dialog
+                    Toast.makeText(getApplicationContext(), "Please install a File Manager.",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
 
         };
         final LinearLayout ll = (LinearLayout) findViewById(R.id.pf_index_selectfilesButton);
