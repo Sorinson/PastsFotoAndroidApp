@@ -1,21 +1,6 @@
 package lv.iconcept.pastsfoto;
 
 
-import java.net.URI;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import android.app.Activity;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
@@ -34,6 +19,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -48,8 +35,22 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
-public class MultiImageChooserActivity extends Activity implements OnItemClickListener,
+
+public class MultiImageChooserActivity extends FullscreenActivity implements OnItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "ImagePicker";
 
@@ -97,10 +98,13 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        callsToGetView = 0;
         super.onCreate(savedInstanceState);
+        callsToGetView = 0;
         fakeR = new FakeR(this);
+        Log.e("before SetContentView", "Right before setContentView");
         setContentView(fakeR.getId("layout", "multiselectorgrid"));
+        getSupportActionBar().show();
+        Log.e("after SetContentView", "Just after setContentView");
         fileNames.clear();
 
         //String picName = "storage/emulated/0/DCIM/Camera/20150331_095822.jpg";
@@ -147,7 +151,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 
         ia = new ImageAdapter(this);
         gridView.setAdapter(ia);
-        LoaderManager.enableDebugLogging(false);
+        LoaderManager.enableDebugLogging(true);
         getLoaderManager().initLoader(CURSORLOADER_THUMBS, null, this);
         getLoaderManager().initLoader(CURSORLOADER_REAL, null, this);
         //setupPresets();
@@ -156,7 +160,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         progress = new ProgressDialog(this);
         progress.setTitle("Apstrādā bildes");
         progress.setMessage("Šis process var aizņemt kādu laiciņu.");
-        ((TextView) getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_title_textview"))).setText("");
+        ((TextView) getSupportActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_title_textview"))).setText("");
     }
 
     @Override
@@ -164,7 +168,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         String name = getImageName(position);
         if(name.toLowerCase().indexOf(".png") == -1 && name.toLowerCase().indexOf(".bmp") == -1){
             int rotation = getImageRotation(position);
-			/*AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+            /*
+			AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
 			builder1.setTitle("Pic name");
 			builder1.setMessage(name);
 			builder1.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -173,7 +178,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
 				}
 			});
 			AlertDialog alert1 = builder1.create();
-			alert1.show();*/
+			alert1.show();
+            */
 
             boolean isChecked = !isChecked(position);
             if (maxImages == 0 && isChecked) {
@@ -217,7 +223,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
             }
 
             checkStatus.put(position, isChecked);
-            ((TextView) getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_title_textview"))).setText(fileNames.size()+"");
+            ((TextView) getSupportActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_title_textview"))).setText(fileNames.size()+"");
             updateAcceptButton();
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -298,8 +304,8 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     }
 
     public void selectClicked(View ignored) {
-        ((TextView) getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done_textview"))).setEnabled(false);
-        getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done")).setEnabled(false);
+        ((TextView) getSupportActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done_textview"))).setEnabled(false);
+        getSupportActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done")).setEnabled(false);
         progress.show();
         Intent data = new Intent();
         if (fileNames.isEmpty()) {
@@ -316,33 +322,16 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
      * Helper Methods
      ********************/
     private void updateAcceptButton() {
-        ((TextView) getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done_textview")))
-                .setEnabled(fileNames.size() != 0);
-        getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done")).setEnabled(fileNames.size() != 0);
+        ((TextView) getSupportActionBar().getCustomView().findViewById(R.id.actionbar_done_textview)).setEnabled(fileNames.size() != 0);
+        getSupportActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_done")).setEnabled(fileNames.size() != 0);
     }
 
     private void setupHeader() {
-        // From Roman Nkk's code
-        // https://plus.google.com/113735310430199015092/posts/R49wVvcDoEW
-        // Inflate a "Done/Discard" custom action bar view
-        /*
-         * Copyright 2013 The Android Open Source Project
-         *
-         * Licensed under the Apache License, Version 2.0 (the "License");
-         * you may not use this file except in compliance with the License.
-         * You may obtain a copy of the License at
-         *
-         *     http://www.apache.org/licenses/LICENSE-2.0
-         *
-         * Unless required by applicable law or agreed to in writing, software
-         * distributed under the License is distributed on an "AS IS" BASIS,
-         * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-         * See the License for the specific language governing permissions and
-         * limitations under the License.
-         */
-        LayoutInflater inflater = (LayoutInflater) getActionBar().getThemedContext().getSystemService(
-                LAYOUT_INFLATER_SERVICE);
+
+        LayoutInflater inflater = (LayoutInflater) getSupportActionBar().getThemedContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+
         final View customActionBarView = inflater.inflate(fakeR.getId("layout", "actionbar_custom_view_done_discard"), null);
+
         customActionBarView.findViewById(fakeR.getId("id", "actionbar_done")).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -358,11 +347,11 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
         });
 
         // Show the custom action bar view and hide the normal Home icon and title.
-        final ActionBar actionBar = getActionBar();
-        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM, ActionBar.DISPLAY_SHOW_CUSTOM
-                | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
-        actionBar.setCustomView(customActionBarView, new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
+        final android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM, ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_SHOW_TITLE);
+
+        actionBar.setCustomView(customActionBarView, new android.support.v7.app.ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
     private String getImageName(int position) {
@@ -395,28 +384,13 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
     }
 
     public void setupPresets() {
+        Log.d("selected", selectedImages.getClass().getName());
+        Log.d("selected", selectedImages);
         List<String> selectedImagesList = Arrays.asList(selectedImages.split(";"));
-		/*actualimagecursor.moveToPosition(0);
-		String imageName = actualimagecursor.getString(actual_image_column_index);
-    	selectedImagesList.add(imageName);
-    	actualimagecursor.moveToPosition(1);
-    	selectedImagesList.add(actualimagecursor.getString(actual_image_column_index));*/
         actualimagecursor.moveToPosition(-1);
         while(actualimagecursor.moveToNext()){
 
             String name = actualimagecursor.getString(actual_image_column_index);
-    		/*if(actualimagecursor.getPosition() == 0 && selectedImagesList.size() > 0){
-    			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Name of image");
-                builder.setMessage("First image: " + name + " Second image: " + selectedImagesList.get(1));
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                AlertDialog alert = builder.create();
-                alert.show();
-    		}*/
             if(selectedImagesList.contains(name)){
                 int orientation = actualimagecursor.getInt(orientation_column_index);
                 fileNames.put(name,orientation);
@@ -424,7 +398,7 @@ public class MultiImageChooserActivity extends Activity implements OnItemClickLi
                 maxImages--;
             }
         }
-        ((TextView) getActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_title_textview"))).setText(fileNames.size()+"");
+        ((TextView) getSupportActionBar().getCustomView().findViewById(fakeR.getId("id", "actionbar_title_textview"))).setText(fileNames.size()+"");
         updateAcceptButton();
     }
     /*********************

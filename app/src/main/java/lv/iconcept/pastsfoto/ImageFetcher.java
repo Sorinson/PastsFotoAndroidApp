@@ -108,8 +108,7 @@ public class ImageFetcher {
             Integer bitmapPosition = bitmapDownloaderTask.position;
             if ((bitmapPosition == null) || (!bitmapPosition.equals(position))) {
                 // Log.d("DAVID", "Canceling...");
-                MediaStore.Images.Thumbnails.cancelThumbnailRequest(imageView.getContext().getContentResolver(),
-                        origId, 12345);
+                MediaStore.Images.Thumbnails.cancelThumbnailRequest(imageView.getContext().getContentResolver(), origId, 12345);
                 bitmapDownloaderTask.cancel(true);
             } else {
                 return false;

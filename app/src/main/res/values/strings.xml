@@ -5,4 +5,8 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="pievienot_bildes">Pievienot bildes</string>
     <string name="bilzu_izvele_augsupieladei">Bilžu izvēle augšupielādei</string>
+    <string name="done">Done</string>
+    <string name="discard">Discard</string>
+    <string name="ReadExtStoragePermDescription">Required for image selection and upload</string>
+    <string name="permlab_read_external_storage">ReadExternalStorage</string>
 </resources>

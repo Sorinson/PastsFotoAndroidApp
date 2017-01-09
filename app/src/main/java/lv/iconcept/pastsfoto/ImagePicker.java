@@ -5,15 +5,14 @@ package lv.iconcept.pastsfoto;
  */
 
 
+import android.app.Activity;
+import android.content.Intent;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.content.Context;
 
 
 public class ImagePicker extends ImageFetcher {
