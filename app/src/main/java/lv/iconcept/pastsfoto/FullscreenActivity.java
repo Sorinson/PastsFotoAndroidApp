@@ -16,13 +16,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 
 
 public class FullscreenActivity extends AppCompatActivity {
     private static final int FILE_SELECT_CODE = 0;
     private String selectedImages = "";
+    private String addedImages = "";
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
@@ -59,7 +63,7 @@ public class FullscreenActivity extends AppCompatActivity {
                         intent.putExtra("WIDTH", 0);
                         intent.putExtra("HEIGHT", 0);
                         intent.putExtra("QUALITY", 100);
-                        intent.putExtra("SELECTED_IMAGES", selectedImages);
+                        intent.putExtra("SELECTED_IMAGES", addedImages);
 
                         startActivityForResult(intent, FILE_SELECT_CODE);
                     } catch (android.content.ActivityNotFoundException ex) {
@@ -85,14 +89,35 @@ public class FullscreenActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK && data != null) {
             ArrayList<String> fileNames = data.getStringArrayListExtra("MULTIPLEFILENAMES");
             JSONArray res = new JSONArray(fileNames);
+            JSONArray bildes = new JSONArray();
+            addedImages = "";
+            try {
+                for(int i=0;i<res.length();i+=2){
+                    JSONObject temp = new JSONObject();
+                    temp.put("thumb", res.getString(i+1));
+                    temp.put("original", res.getString(i));
+                    temp.put("count", 1);
+                    if(addedImages != "") {
+                        addedImages = addedImages + ";" +temp.getString("original");
+                    }else {
+                        addedImages = URLDecoder.decode(temp.getString("original").replace("file://", ""));
+                    }
+                    bildes.put(temp);
+                }
+                Log.v("Result --> ",""+bildes);
+            } catch (JSONException e) {
+                Log.e("Result Error --> ",e.toString());
+            }
             selectedImages = res.toString();
-            Log.d("fileUri", "success -> " + res.toString());
+            Log.d("fileUri", "success -> " + res);
         } else if (resultCode == Activity.RESULT_CANCELED && data != null) {
             String error = data.getStringExtra("ERRORMESSAGE");
             Log.d("fileUri", "response error -> " + error.toString());
+            Toast.makeText(getApplicationContext(), "Bilžu izvēle atcelta.", Toast.LENGTH_SHORT).show();
         } else if (resultCode == Activity.RESULT_CANCELED) {
             JSONArray res = new JSONArray();
             Log.d("fileUri", "cancel -> " + res.toString());
+            Toast.makeText(getApplicationContext(), "Bilžu izvēle atcelta.", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(), "Netika izvēlēta neviena bilde.", Toast.LENGTH_SHORT).show();
         }

@@ -391,6 +391,7 @@ public class MultiImageChooserActivity extends FullscreenActivity implements OnI
         while(actualimagecursor.moveToNext()){
 
             String name = actualimagecursor.getString(actual_image_column_index);
+            Log.d("selectedName", name);
             if(selectedImagesList.contains(name)){
                 int orientation = actualimagecursor.getInt(orientation_column_index);
                 fileNames.put(name,orientation);
